@@ -220,6 +220,67 @@ func (t *Tracker) GetSessionBreakdown(start, end time.Time) ([]SessionBreakdown,
 	return breakdowns, rows.Err()
 }
 
+// NewReadOnlyTracker opens the cost database in read-only mode.
+// This avoids write contention with agent processes that own the DB.
+func NewReadOnlyTracker(dbPath string) (*Tracker, error) {
+	if _, err := os.Stat(dbPath); err != nil {
+		return nil, fmt.Errorf("cost db not found: %w", err)
+	}
+	db, err := sql.Open("sqlite3", dbPath+"?mode=ro")
+	if err != nil {
+		return nil, fmt.Errorf("open cost db (read-only): %w", err)
+	}
+	// Verify connection works
+	if err := db.Ping(); err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("ping cost db: %w", err)
+	}
+	return &Tracker{db: db}, nil
+}
+
+// GetSessionCost returns cost breakdown for a single session.
+func (t *Tracker) GetSessionCost(sessionID string) (*SessionBreakdown, error) {
+	query := `
+	SELECT 
+		session_id,
+		COALESCE(SUM(cost), 0) as total_cost,
+		COUNT(*) as call_count,
+		COALESCE(SUM(input_tokens), 0) as input_tokens,
+		COALESCE(SUM(output_tokens), 0) as output_tokens,
+		COALESCE(SUM(cache_creation_tokens), 0) as cache_creation_tokens,
+		COALESCE(SUM(cache_read_tokens), 0) as cache_read_tokens,
+		MIN(timestamp) as first_call,
+		MAX(timestamp) as last_call
+	FROM cost_records
+	WHERE session_id = ?
+	GROUP BY session_id
+	`
+
+	var b SessionBreakdown
+	var firstCallStr, lastCallStr sql.NullString
+	err := t.db.QueryRow(query, sessionID).Scan(
+		&b.SessionID, &b.TotalCost, &b.CallCount,
+		&b.InputTokens, &b.OutputTokens,
+		&b.CacheCreationTokens, &b.CacheReadTokens,
+		&firstCallStr, &lastCallStr,
+	)
+	if err == sql.ErrNoRows {
+		return &SessionBreakdown{SessionID: sessionID}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query session cost: %w", err)
+	}
+
+	if firstCallStr.Valid {
+		b.FirstCall, _ = parseTimestamp(firstCallStr.String)
+	}
+	if lastCallStr.Valid {
+		b.LastCall, _ = parseTimestamp(lastCallStr.String)
+	}
+
+	return &b, nil
+}
+
 // Close closes the database connection.
 func (t *Tracker) Close() error {
 	if t.db != nil {

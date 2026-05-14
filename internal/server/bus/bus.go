@@ -106,6 +106,19 @@ func PublishEvent(sessionID string, event types.OutboundEvent) {
 	}
 }
 
+// ListSessions returns a snapshot of all active session metadata.
+// The returned slice is safe to use without holding the lock.
+func ListSessions() []*types.SessionMeta {
+	sessions.RLock()
+	defer sessions.RUnlock()
+	result := make([]*types.SessionMeta, 0, len(sessions.m))
+	for _, meta := range sessions.m {
+		cp := *meta
+		result = append(result, &cp)
+	}
+	return result
+}
+
 // Subscribe returns a channel of events for a session and an unsubscribe function.
 func Subscribe(sessionID string) (<-chan types.OutboundEvent, func()) {
 	ch := make(chan types.OutboundEvent, 64)
