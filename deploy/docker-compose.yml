@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  forge-gateway:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GATEWAY_PORT=3000
+      - GATEWAY_HOST=0.0.0.0
+      - WORKSPACE_DIR=/tmp/forge/workspace
+      - SESSIONS_DIR=/tmp/forge/sessions
+    ports:
+      - "3000:3000"
+    volumes:
+      - forge-sessions:/tmp/forge/sessions
+      - forge-workspace:/tmp/forge/workspace
+
+  discord-bridge:
+    build:
+      context: ..
+      dockerfile: Dockerfile.bridge
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+      - FORGE_GATEWAY_URL=http://forge-gateway:3000
+      - BRIDGE_DB_PATH=/data/bridge.db
+      - BRIDGE_LISTEN_ADDR=:8080
+      - BRIDGE_CHANNELS_PATH=/config/channels.json
+      - BRIDGE_LOG_LEVEL=${BRIDGE_LOG_LEVEL:-info}
+      - BRIDGE_SHOW_THINKING=${BRIDGE_SHOW_THINKING:-false}
+      - BRIDGE_REVEAL_SESSION_ID=${BRIDGE_REVEAL_SESSION_ID:-false}
+      - BRIDGE_ADMIN_TOKEN=${BRIDGE_ADMIN_TOKEN:-}
+    ports:
+      - "8080:8080"
+    volumes:
+      - bridge-data:/data
+      - ./channels.json:/config/channels.json:ro
+    depends_on:
+      - forge-gateway
+    restart: unless-stopped
+
+volumes:
+  forge-sessions:
+  forge-workspace:
+  bridge-data:

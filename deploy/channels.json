@@ -1,0 +1,10 @@
+{
+  "channels": [
+    {
+      "channelId": "1504550234661978343",
+      "repoPath": "/code/forge",
+      "defaultBaseBranch": "main",
+      "allowedUserIds": null
+    }
+  ]
+}
