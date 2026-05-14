@@ -14,8 +14,12 @@ conversation with a colleague.
 
 The bridge does not run *inside* Forge. It is a separate process that talks
 to Forge over its existing HTTP gateway API. This keeps Forge unaware of
-Discord, keeps the bridge replaceable (Slack, Mattermost, etc. later), and
-satisfies the build rule: agents run in containers (Docker).
+Discord and keeps the bridge replaceable (Slack, Mattermost, etc. later).
+It satisfies the build rule: agents run in containers (Docker).
+
+The bridge lives in this repo under `cmd/forge-discord-bridge/` so it can
+share types (`internal/types`) with the gateway without copy-paste. It
+builds and releases as a separate binary / container image.
 
 ## Context
 - **Forge gateway HTTP API** (already exists):
@@ -220,11 +224,12 @@ On `BRIDGE_LISTEN_ADDR`:
   the bridge only talks HTTP to Forge.
 
 ## Constraints
-- The bridge MUST NOT import any Forge internal packages. It speaks the
-  public HTTP API only. Repo structure: separate Go module under
-  `cmd/forge-discord-bridge/` or, preferably, a sibling repo
-  (`tbarnesjr/forge-discord-bridge`) so it can release independently.
-  Default in this spec: separate repo.
+- The bridge speaks the public Forge HTTP API only. It MAY import
+  `internal/types` for the `OutboundEvent` contract (and similar small
+  shared structs) since the binaries ship from the same repo, but it MUST
+  NOT import handlers, the bus, the session store, or any other gateway
+  internals. The wire is the public API; sharing struct definitions is a
+  build-time convenience, not a coupling.
 - The bridge MUST handle SSE reconnection. If Forge gateway restarts mid-
   session, the bridge reconnects with backoff and reports the gap as a
   ⚠️ reaction on the most recent message.
@@ -284,9 +289,10 @@ type Store interface {
 }
 ```
 
-The `types.OutboundEvent` shape can be **copied** into the bridge repo (it's
-a small stable contract) rather than imported, preserving the constraint
-above. Document the source of truth in the bridge README.
+Since the bridge lives in the same repo, it imports `OutboundEvent` and
+sibling structs directly from `internal/types`. If we later split the
+bridge into its own repo, the move is mechanical: copy the contract struct
+over and pin the gateway version it targets.
 
 ## Edge Cases
 - **Thread created by a bot** (e.g. another integration): ignore, no
@@ -337,7 +343,9 @@ above. Document the source of truth in the bridge README.
   `/healthz` green against a stub.
 
 ## Rollout
-1. Build the bridge in a separate repo: `tbarnesjr/forge-discord-bridge`.
+1. Build the bridge in this repo under `cmd/forge-discord-bridge/`.
+   New binary, new Dockerfile, new compose entry. Existing `forge` /
+   `forge gateway` / `forge agent` binaries untouched.
 2. Create a new Discord application "Troy" (separate from `pelton`).
    Required bot scopes: `bot`, `applications.commands`. Bot permissions:
    `View Channels`, `Send Messages`, `Send Messages in Threads`, `Create
