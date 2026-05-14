@@ -9,12 +9,16 @@ default:
 
 # ── Build ────────────────────────────────────────────────────
 
+# Build web frontend (requires Node.js)
+build-web:
+  cd web && npm ci && npm run build
+
 # Build unified forge binary
 build:
   go build -o forge ./cmd/forge
 
-# Build everything
-build-all: build
+# Build everything (web + go)
+build-all: build-web build
 
 # Install unified forge binary to GOBIN (defaults to ~/go/bin)
 install:
@@ -29,6 +33,10 @@ dev: build
 # Build and run gateway (unified binary)
 dev-gateway: build
   ./forge gateway
+
+# Run web frontend dev server (Vite with HMR, proxies /api to localhost:3000)
+dev-web:
+  cd web && npm run dev
 
 # Build and run gateway in daemon mode (unified binary)
 dev-gateway-daemon: build
