@@ -1,0 +1,21 @@
+# Build artifacts
+forge
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+web/node_modules/
+
+# Go
+*.test
+
+# Sessions / state
+/tmp/
+
+# Forge local config
+.forge/settings.local.json
