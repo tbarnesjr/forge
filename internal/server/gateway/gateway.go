@@ -30,6 +30,9 @@ type Config struct {
 	WorkspaceDir string
 	SessionsDir  string
 	Backend      backend.Backend
+	CostDBPath   string // path to costs.db (optional; cost endpoints return 503 if empty)
+	Token        string // optional bearer token for /api/ routes
+	UIPath       string // mount path for UI (default "/ui"), empty to disable
 }
 
 // Start launches the HTTP server.
@@ -42,6 +45,14 @@ func Start(cfg Config) error {
 	mux.HandleFunc("POST /sessions/{sessionId}/review", handleReview(cfg))
 	mux.HandleFunc("POST /sessions/{sessionId}/interrupt", handleInterrupt(cfg))
 	mux.HandleFunc("GET /sessions/{sessionId}/events", handleEvents)
+
+	// Register read-only API endpoints (with auth middleware)
+	registerAPIRoutes(mux, cfg)
+
+	// Register embedded UI if not disabled
+	if cfg.UIPath != "" {
+		RegisterUI(mux, cfg.UIPath)
+	}
 
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	log.Printf("[gateway] listening on %s", addr)

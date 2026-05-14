@@ -31,6 +31,24 @@ func runGateway(args []string) int {
 	workspaceDir := envStr("WORKSPACE_DIR", "/tmp/forge/workspace")
 	sessionsDir := envStr("SESSIONS_DIR", defaultSessionsDir)
 	forgeBin := envStr("FORGE_BIN", "forge")
+	gatewayToken := os.Getenv("FORGE_GATEWAY_TOKEN")
+
+	// Cost DB path: default to ~/.forge/costs.db if it exists
+	costDBPath := os.Getenv("FORGE_COST_DB")
+	if costDBPath == "" {
+		if home, err := os.UserHomeDir(); err == nil {
+			candidate := filepath.Join(home, ".forge", "costs.db")
+			if _, err := os.Stat(candidate); err == nil {
+				costDBPath = candidate
+			}
+		}
+	}
+
+	// UI mount path: default "/ui", overridable, disable with FORGE_UI_DISABLE=1
+	uiPath := envStr("FORGE_UI_PATH", "/ui")
+	if os.Getenv("FORGE_UI_DISABLE") == "1" {
+		uiPath = ""
+	}
 
 	// Handle daemon mode by re-executing in background
 	if *daemon && os.Getenv("FORGE_DAEMON_CHILD") != "1" {
@@ -90,6 +108,9 @@ func runGateway(args []string) int {
 		WorkspaceDir: workspaceDir,
 		SessionsDir:  sessionsDir,
 		Backend:      be,
+		CostDBPath:   costDBPath,
+		Token:        gatewayToken,
+		UIPath:       uiPath,
 	}
 
 	if err := gateway.Start(cfg); err != nil {
