@@ -13,8 +13,12 @@ default:
 build:
   go build -o forge ./cmd/forge
 
+# Build discord bridge binary
+build-bridge:
+  go build -o forge-discord-bridge ./cmd/forge-discord-bridge
+
 # Build everything
-build-all: build
+build-all: build build-bridge
 
 # Install unified forge binary to GOBIN (defaults to ~/go/bin)
 install:
@@ -70,4 +74,4 @@ vet:
 
 # Remove build artifacts
 clean:
-  rm -f forge
+  rm -f forge forge-discord-bridge
