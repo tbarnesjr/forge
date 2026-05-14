@@ -1,4 +1,4 @@
-// Package phase defines composable agent phases (spec-creator, coder, reviewer)
+// Package phase defines composable agent phases (architect, coder, reviewer)
 // and the software-engineer orchestrator that chains them.
 package phase
 
@@ -18,18 +18,20 @@ type Phase struct {
 // Result is the output of a completed phase.
 type Result struct {
 	Phase        string                       // phase name
-	SpecPath     string                       // path to spec file (spec-creator output)
+	SpecPath     string                       // path to spec file (architect output)
 	Diff         string                       // git diff (coder output)
 	Findings     []review.Finding             // raw review findings (reviewer output)
 	Consolidated []review.ConsolidatedFinding // deduplicated findings (post-consolidation)
 	HistoryID    string                       // conversation historyID for session resumption
 }
 
-// SpecCreator returns the spec-creator phase configuration.
-func SpecCreator() Phase {
+// Architect returns the architect phase configuration.
+// The architect explores the codebase, analyses the request, and produces
+// a feature specification at .forge/specs/<id>.md.
+func Architect() Phase {
 	return Phase{
 		Name: "spec",
-		// Spec creator can read, explore, write new specs, and edit existing
+		// Architect can read, explore, write new specs, and edit existing
 		// specs (for deduplication). No sub-agents.
 		DisallowedTools: []string{
 			"Agent", "AgentGet", "AgentList", "AgentStop",

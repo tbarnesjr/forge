@@ -37,7 +37,7 @@ type OrchestratorOpts struct {
 	Emit          func(types.OutboundEvent)
 	AuditLogger   types.AuditLogger
 	InitialPrompt string
-	SpecPath      string // if set, skip spec-creator phase
+	SpecPath      string // if set, skip architect phase
 
 	// QAHistoryID, when set, resumes an existing Q&A conversation.
 	QAHistoryID string
@@ -64,7 +64,7 @@ type OrchestratorResult struct {
 	// CoderHistoryID is set after the SWE pipeline completes.
 	// The caller uses this to resume the coder conversation for follow-ups.
 	CoderHistoryID string
-	// SpecHistoryID is set after spec creation (planner or spec-creator).
+	// SpecHistoryID is set after spec creation (planner or architect).
 	// Available for extension (e.g., re-running the spec phase).
 	SpecHistoryID string
 }
@@ -95,7 +95,7 @@ func NewSWEOrchestrator() *Orchestrator {
 //	        │ task
 //	        ▼
 //	┌─────────────┐
-//	│ Spec Creator │──▶ .forge/specs/<id>.md
+//	│  Architect   │──▶ .forge/specs/<id>.md
 //	└──────┬──────┘
 //	       │
 //	       ▼
@@ -247,12 +247,12 @@ func (o *Orchestrator) runSWEPipeline(ctx context.Context, opts OrchestratorOpts
 			o.emitPhaseComplete(opts, "ideate", fmt.Sprintf("spec: %s", specPath))
 
 		default:
-			// Single-agent spec creator (original behavior)
+			// Single-agent architect (original behavior)
 			o.emitPhaseStart(opts, "spec")
 
-			specResult, err := o.runSpecCreator(ctx, opts)
+			specResult, err := o.runArchitect(ctx, opts)
 			if err != nil {
-				return result, fmt.Errorf("spec-creator phase: %w", err)
+				return result, fmt.Errorf("architect phase: %w", err)
 			}
 
 			specPath = specResult.SpecPath
@@ -457,8 +457,8 @@ func RunSinglePhase(ctx context.Context, opts OrchestratorOpts, phase Phase) err
 	return l.Send(ctx, opts.InitialPrompt, opts.Emit)
 }
 
-func (o *Orchestrator) runSpecCreator(ctx context.Context, opts OrchestratorOpts) (Result, error) {
-	phase := SpecCreator()
+func (o *Orchestrator) runArchitect(ctx context.Context, opts OrchestratorOpts) (Result, error) {
+	phase := Architect()
 	registry := opts.Registry.Filtered(phase.AllowedTools, phase.DisallowedTools)
 	bundle := InjectPhasePrompt(opts.Bundle, phase.Name)
 
@@ -481,7 +481,7 @@ func (o *Orchestrator) runSpecCreator(ctx context.Context, opts OrchestratorOpts
 
 	l := loop.New(loopOpts)
 	if err := l.Send(ctx, opts.InitialPrompt, opts.Emit); err != nil {
-		log.Printf("[orchestrator:%s] spec-creator phase Send failed (historyID=%s, promptLen=%d): %v",
+		log.Printf("[orchestrator:%s] architect phase Send failed (historyID=%s, promptLen=%d): %v",
 			opts.SessionID, l.HistoryID(), len(opts.InitialPrompt), err)
 		return Result{Phase: "spec", HistoryID: l.HistoryID()}, err
 	}
@@ -823,7 +823,7 @@ func detectDefaultBranchSafe(cwd string) string {
 //
 //	"ideate" → always ideate
 //	"code"   → never ideate
-//	"auto"/""→ use complexity gate (for now: default to single-agent spec creator)
+//	"auto"/""→ use complexity gate (for now: default to single-agent architect)
 func shouldIdeate(hint string) bool {
 	switch hint {
 	case "ideate":
@@ -832,7 +832,7 @@ func shouldIdeate(hint string) bool {
 		return false
 	default:
 		// "auto" or empty: complexity gate decides.
-		// For now, default to false (single-agent spec creator) until
+		// For now, default to false (single-agent architect) until
 		// the complexity gate is implemented in a separate spec.
 		return false
 	}

@@ -1,14 +1,18 @@
 package phase
 
-// specCreatorPrompt is the system prompt for the spec-creator phase.
+// architectPrompt is the system prompt for the architect phase.
 // Focused on product thinking, codebase analysis, and spec authorship.
 //
 // NOTE: The spec format itself is already in the base system prompt via
 // specPrompt in runtime/prompt/prompt.go — do NOT duplicate it here.
 // This prompt adds *process guidance* for how to explore and write specs.
-const specCreatorPrompt = `You are a senior technical product manager and software architect.
+const architectPrompt = `You are a software architect.
 Your job is to analyze feature requests, explore the codebase, and produce
 high-quality feature specifications.
+
+Beyond template-filling, you are responsible for deciding whether a request maps
+to one spec or two, whether it needs a spec at all, naming and categorising
+specs, linking to related specs, and pushing back on layering violations.
 
 ## Exploration Strategy
 
@@ -271,7 +275,7 @@ existing one, and why.`
 func PromptForPhase(name string) string {
 	switch name {
 	case "spec":
-		return specCreatorPrompt
+		return architectPrompt
 	case "code":
 		return coderPrompt
 	case "review":

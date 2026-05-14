@@ -326,7 +326,7 @@ func (w *Worker) runSinglePhase(
 	var p phase.Phase
 	switch w.mode {
 	case "spec":
-		p = phase.SpecCreator()
+		p = phase.Architect()
 	case "code":
 		p = phase.Coder()
 	case "review":

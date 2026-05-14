@@ -142,7 +142,7 @@ func runCLI(args []string) int {
 
 	// Validate mode/spec conflicts.
 	if *mode == "spec" && *specPath != "" {
-		fmt.Fprintln(os.Stderr, errorStyle.Render("cannot use --spec with --mode spec (spec creator writes specs, it doesn't consume them)"))
+		fmt.Fprintln(os.Stderr, errorStyle.Render("cannot use --spec with --mode spec (architect writes specs, it doesn't consume them)"))
 		os.Exit(1)
 	}
 	if *mode == "code" && *specPath == "" {

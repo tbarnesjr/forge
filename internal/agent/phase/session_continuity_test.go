@@ -140,16 +140,16 @@ func TestRunCoderResume_SessionStoreHasAllMessages(t *testing.T) {
 		"Resume should append messages to the same historyID session")
 }
 
-func TestRunSpecCreator_ReturnsHistoryID(t *testing.T) {
+func TestRunArchitect_ReturnsHistoryID(t *testing.T) {
 	r := require.New(t)
 	prov := &textProvider{}
 	opts := makeTestOrchestratorOpts(t, prov)
 	opts.InitialPrompt = "Build a paintball tournament tracker for Greendale"
 	orch := NewSWEOrchestrator()
 
-	result, err := orch.runSpecCreator(context.Background(), opts)
+	result, err := orch.runArchitect(context.Background(), opts)
 	r.NoError(err)
-	r.NotEmpty(result.HistoryID, "runSpecCreator should return a historyID for future resumption")
+	r.NotEmpty(result.HistoryID, "runArchitect should return a historyID for future resumption")
 }
 
 func TestOrchestratorResult_CoderHistoryID(t *testing.T) {

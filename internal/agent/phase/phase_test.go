@@ -16,8 +16,8 @@ func TestPhaseDefinitions(t *testing.T) {
 		wantDisallowed []string
 		wantAllAllowed bool // true if no tool restrictions
 	}{
-		"spec creator": {
-			phase:        SpecCreator(),
+		"architect": {
+			phase:        Architect(),
 			wantName:     "spec",
 			wantMaxTurns: 200,
 			wantDisallowed: []string{
@@ -107,7 +107,7 @@ func TestPromptForPhase(t *testing.T) {
 	}{
 		"spec": {
 			phaseName:    "spec",
-			wantContains: "product manager",
+			wantContains: "software architect",
 		},
 		"code": {
 			phaseName:    "code",
@@ -155,18 +155,18 @@ func TestPromptForPhase(t *testing.T) {
 	}
 }
 
-func TestSpecCreatorAndPlanner_EditAllowed(t *testing.T) {
+func TestArchitectAndPlanner_EditAllowed(t *testing.T) {
 	r := require.New(t)
 
-	// Edit must be allowed for both spec creator and planner
+	// Edit must be allowed for both architect and planner
 	// so they can update existing specs in place.
-	for _, phase := range []Phase{SpecCreator(), Planner()} {
+	for _, phase := range []Phase{Architect(), Planner()} {
 		r.NotContains(phase.DisallowedTools, "Edit",
 			"phase %q must allow Edit for spec dedup", phase.Name)
 	}
 }
 
-func TestSpecCreatorPrompt_ContainsDedupInstructions(t *testing.T) {
+func TestArchitectPrompt_ContainsDedupInstructions(t *testing.T) {
 	r := require.New(t)
 
 	prompt := PromptForPhase("spec")
@@ -239,7 +239,7 @@ func TestInjectPhasePrompt(t *testing.T) {
 	r.Len(injected.AgentsMD, 1)
 	r.Equal("phase:spec", injected.AgentsMD[0].Path)
 	r.Equal("phase", injected.AgentsMD[0].Level)
-	r.Contains(injected.AgentsMD[0].Content, "product manager")
+	r.Contains(injected.AgentsMD[0].Content, "software architect")
 }
 
 func TestFindLatestSpec(t *testing.T) {
