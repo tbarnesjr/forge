@@ -1,6 +1,6 @@
 ---
 id: review-system
-status: active
+status: implemented
 ---
 # Umbrella spec: review system — roster, architecture, and extensibility
 
@@ -30,6 +30,8 @@ Files that define and orchestrate the review system today:
 - `internal/review/consolidate.go` — `Consolidate()`, prompt construction, fallback, formatting helpers
 - `internal/review/dedup.go` — deterministic dedup: `DedupRawFindings()`, similarity matching
 - `internal/review/diff.go` — `GetDiff()`, `GetIncrementalDiff()`, `GetHeadSHA()`, `detectBaseBranch()`
+- `internal/review/detect.go` — `QualityCommands`, `DetectQualityCommands()`, multi-source detection
+- `internal/review/run.go` — `DeterministicReviewer`, `ProjectQualityReviewer`, command execution, output parsing
 - `internal/agent/phase/orchestrator.go` — `runSWEPipeline()` review→fix loop (cycles, severity gating, squash)
 - `internal/agent/worker.go` — `/review` command handler (manual one-shot review)
 - `internal/tools/squash.go` — `SquashBranchCommits()` called post-review

@@ -94,7 +94,7 @@ All forge configuration lives under `.forge/`:
 - `.forge/agents/` — agent definitions (`.md` with frontmatter)
 - `.forge/specs/` — feature specifications
 - `.forge/learnings/` — actionable gotchas and discoveries from agent sessions
-- `.forge/config.json` — forge-level config (specsDir, etc.)
+- `.forge/config.json` — forge-level config (specsDir, quality commands, etc.)
 
 For backward compatibility, `.claude/` is also checked as a fallback if `.forge/` doesn't exist.
 
