@@ -13,7 +13,16 @@ import (
 
 // ForgeConfig holds forge-level configuration.
 type ForgeConfig struct {
-	SpecsDir string `json:"specsDir,omitempty"` // override for specs directory (default: .forge/specs)
+	SpecsDir string         `json:"specsDir,omitempty"` // override for specs directory (default: .forge/specs)
+	Quality  *QualityConfig `json:"quality,omitempty"`   // quality commands for project-quality reviewer
+}
+
+// QualityConfig holds project quality check commands.
+type QualityConfig struct {
+	Lint    []string `json:"lint,omitempty"`    // lint/check commands
+	Test    []string `json:"test,omitempty"`    // test commands
+	Format  []string `json:"format,omitempty"`  // format/fmt commands
+	Timeout string   `json:"timeout,omitempty"` // per-command timeout (e.g. "5m"), parsed as time.Duration
 }
 
 // Load merges configuration from user (~/.forge/config.json) and project
@@ -54,6 +63,10 @@ func mergeFile(dst *ForgeConfig, path string) error {
 
 	if cfg.SpecsDir != "" {
 		dst.SpecsDir = cfg.SpecsDir
+	}
+
+	if cfg.Quality != nil {
+		dst.Quality = cfg.Quality
 	}
 
 	return nil

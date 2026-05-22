@@ -369,7 +369,7 @@ func (o *Orchestrator) runSWEPipeline(ctx context.Context, opts OrchestratorOpts
 		}
 		prevReviewSHA = sha
 
-		reviewResult, err := o.runReviewerWithDiff(ctx, opts, specPath, diff, incremental)
+		reviewResult, err := o.runReviewerWithDiff(ctx, opts, specPath, diff, incremental, true)
 		if err != nil {
 			log.Printf("[orchestrator:%s] reviewer error (continuing): %v", opts.SessionID, err)
 			break
@@ -558,14 +558,15 @@ func (o *Orchestrator) runCoderResume(ctx context.Context, opts OrchestratorOpts
 
 func (o *Orchestrator) runReviewer(ctx context.Context, opts OrchestratorOpts, specPath string) (Result, error) {
 	// Full branch diff for manual /review — not incremental.
+	// Project-quality reviewer does NOT run on manual /review.
 	diff, err := review.GetDiff(opts.CWD, "")
 	if err != nil {
 		return Result{Phase: "review"}, fmt.Errorf("get diff: %w", err)
 	}
-	return o.runReviewerWithDiff(ctx, opts, specPath, diff, false)
+	return o.runReviewerWithDiff(ctx, opts, specPath, diff, false, false)
 }
 
-func (o *Orchestrator) runReviewerWithDiff(ctx context.Context, opts OrchestratorOpts, specPath string, diff string, incremental bool) (Result, error) {
+func (o *Orchestrator) runReviewerWithDiff(ctx context.Context, opts OrchestratorOpts, specPath string, diff string, incremental bool, runProjectQuality bool) (Result, error) {
 	result := Result{Phase: "review"}
 
 	// Collect available providers.
@@ -601,6 +602,28 @@ func (o *Orchestrator) runReviewerWithDiff(ctx context.Context, opts Orchestrato
 
 	result.Diff = diff
 
+	// Run project-quality reviewer (deterministic, in-process) — SWE pipeline only.
+	var projectQualityResults []review.ReviewResult
+	if runProjectQuality {
+		pqReviewer := review.ProjectQualityReviewer{}
+		findings := pqReviewer.Run(ctx, opts.CWD)
+		if len(findings) > 0 {
+			pqResult := review.ReviewResult{
+				Reviewer: pqReviewer.Name(),
+				Provider: "local",
+				Findings: findings,
+			}
+			projectQualityResults = append(projectQualityResults, pqResult)
+			opts.Emit(types.OutboundEvent{
+				ID:        uuid.New().String(),
+				SessionID: opts.SessionID,
+				Type:      "review_agent_done",
+				Content:   fmt.Sprintf("Reviewer: %s, Provider: local, Findings: %d", pqReviewer.Name(), len(findings)),
+				Timestamp: time.Now().Unix(),
+			})
+		}
+	}
+
 	// Pick reviewers.
 	var reviewers []review.Reviewer
 	hasActiveSpecs := false
@@ -629,6 +652,27 @@ func (o *Orchestrator) runReviewerWithDiff(ctx context.Context, opts Orchestrato
 	}
 
 	cr := orch.Run(ctx, req, opts.Emit)
+
+	// Merge project-quality findings into raw results for consolidation.
+	cr.Raw = append(projectQualityResults, cr.Raw...)
+
+	// Re-consolidate if project-quality findings were added.
+	// The LLM consolidation already ran on the LLM results; the project-quality
+	// findings are added to the consolidated list via deterministic dedup.
+	if len(projectQualityResults) > 0 {
+		for _, pqr := range projectQualityResults {
+			for _, f := range pqr.Findings {
+				cr.Consolidated = append(cr.Consolidated, review.ConsolidatedFinding{
+					Severity:    f.Severity,
+					File:        f.File,
+					StartLine:   f.StartLine,
+					EndLine:     f.EndLine,
+					Description: f.Description,
+					Sources:     []review.Source{{Reviewer: f.Reviewer, Provider: f.Provider}},
+				})
+			}
+		}
+	}
 
 	// Flatten all raw findings into the result.
 	for _, r := range cr.Raw {
