@@ -1,0 +1,647 @@
+/* ==========================================================================
+   Squamish Events — Custom Styles (Pico CSS base)
+   ========================================================================== */
+
+:root {
+  /* Mountain / outdoor palette */
+  --mountain-primary: #2d7d46;
+  --mountain-dark: #1a5c30;
+  --mountain-light: #e8f5ec;
+  --mountain-accent: #2980b9;
+  --mountain-accent-light: #e1f0fa;
+  --mountain-sky: #5dade2;
+  --mountain-stone: #7f8c8d;
+  --mountain-snow: #f9fafb;
+
+  /* Pico overrides */
+  --pico-primary: var(--mountain-primary);
+  --pico-primary-hover: var(--mountain-dark);
+  --pico-primary-focus: rgba(45, 125, 70, 0.25);
+}
+
+/* ==========================================================================
+   Global
+   ========================================================================== */
+body {
+  background: var(--mountain-snow);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main.container {
+  flex: 1;
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+/* ==========================================================================
+   Site Header
+   ========================================================================== */
+.site-header {
+  background: linear-gradient(135deg, var(--mountain-dark) 0%, var(--mountain-primary) 40%, var(--mountain-accent) 100%);
+  color: #fff;
+  padding: 2rem 0 1.5rem;
+  margin-bottom: 0;
+}
+
+.site-header hgroup {
+  margin: 0;
+}
+
+.site-header h1 {
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.site-header p {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+}
+
+.logo-icon {
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Toolbar
+   ========================================================================== */
+.toolbar {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.toolbar-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-box input {
+  margin-bottom: 0;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid #d0d0d0;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.view-btn {
+  background: #fff;
+  border: none;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--mountain-stone);
+  transition: background 0.15s, color 0.15s;
+  margin: 0;
+  border-radius: 0;
+  line-height: 1;
+  width: auto;
+}
+
+.view-btn + .view-btn {
+  border-left: 1px solid #d0d0d0;
+}
+
+.view-btn.active,
+.view-btn:hover {
+  background: var(--mountain-light);
+  color: var(--mountain-primary);
+}
+
+.view-btn svg {
+  fill: currentColor;
+}
+
+.submit-btn {
+  background: var(--mountain-primary);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: background 0.15s;
+  margin: 0;
+  width: auto;
+  line-height: 1.5;
+}
+
+.submit-btn:hover {
+  background: var(--mountain-dark);
+}
+
+/* Filters row */
+.filters-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filters-row select,
+.filters-row input[type="date"] {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  padding: 0.4rem 0.6rem;
+  flex: 1;
+  min-width: 140px;
+  max-width: 220px;
+}
+
+.clear-filters-btn {
+  background: none;
+  border: 1px solid #d0d0d0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--mountain-stone);
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+  margin: 0;
+  width: auto;
+  line-height: 1.5;
+}
+
+.clear-filters-btn:hover {
+  border-color: var(--mountain-primary);
+  color: var(--mountain-primary);
+}
+
+/* ==========================================================================
+   Event List
+   ========================================================================== */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.event-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--mountain-primary);
+  transform: translateY(-1px);
+}
+
+.event-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--mountain-dark);
+  line-height: 1.3;
+}
+
+.event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.event-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.event-meta .meta-icon {
+  font-size: 0.95rem;
+  opacity: 0.7;
+}
+
+.event-category {
+  display: inline-block;
+  background: var(--mountain-light);
+  color: var(--mountain-dark);
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.event-source {
+  display: inline-block;
+  background: var(--mountain-accent-light);
+  color: var(--mountain-accent);
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.event-tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+/* Load more */
+.load-more-wrap {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.load-more-btn {
+  background: #fff;
+  border: 1px solid var(--mountain-primary);
+  color: var(--mountain-primary);
+  padding: 0.5rem 2rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s;
+}
+
+.load-more-btn:hover {
+  background: var(--mountain-primary);
+  color: #fff;
+}
+
+.no-events {
+  text-align: center;
+  color: var(--mountain-stone);
+  padding: 3rem 1rem;
+  font-size: 1.1rem;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 2rem;
+  color: var(--mountain-stone);
+}
+
+/* ==========================================================================
+   Calendar View
+   ========================================================================== */
+.calendar-view {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.calendar-nav h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--mountain-dark);
+}
+
+.calendar-nav button {
+  background: none;
+  border: 1px solid #d0d0d0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--mountain-primary);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.calendar-nav button:hover {
+  background: var(--mountain-light);
+  border-color: var(--mountain-primary);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-header {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--mountain-stone);
+  text-transform: uppercase;
+  padding: 0.4rem 0;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-size: 0.9rem;
+  position: relative;
+  cursor: default;
+  transition: background 0.12s;
+  min-height: 48px;
+}
+
+.cal-day.empty {
+  background: transparent;
+}
+
+.cal-day.has-events {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cal-day.has-events:hover {
+  background: var(--mountain-light);
+}
+
+.cal-day.today {
+  background: var(--mountain-accent-light);
+  border: 2px solid var(--mountain-accent);
+}
+
+.cal-day.selected {
+  background: var(--mountain-primary);
+  color: #fff;
+}
+
+.cal-day.selected .cal-dots {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cal-day-num {
+  line-height: 1;
+}
+
+.cal-dots {
+  display: flex;
+  gap: 2px;
+  margin-top: 3px;
+}
+
+.cal-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mountain-primary);
+}
+
+.cal-count {
+  font-size: 0.65rem;
+  color: var(--mountain-primary);
+  margin-top: 2px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Event Detail Dialog
+   ========================================================================== */
+.event-detail-dialog,
+.submit-dialog {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0;
+  max-width: 600px;
+  width: 92vw;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+}
+
+.event-detail-dialog::backdrop,
+.submit-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.event-detail-dialog article,
+.submit-dialog article {
+  margin: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.event-detail-dialog header,
+.submit-dialog header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.event-detail-dialog header h2,
+.submit-dialog header h2 {
+  margin: 0;
+  flex: 1;
+  font-size: 1.2rem;
+  color: var(--mountain-dark);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--mountain-stone);
+  padding: 0;
+  line-height: 1;
+  width: auto;
+  margin: 0;
+  order: 1;
+}
+
+.close-btn:hover {
+  color: var(--mountain-dark);
+}
+
+#detail-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.detail-field {
+  margin-bottom: 0.75rem;
+}
+
+.detail-field dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mountain-stone);
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+.detail-field dd {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.detail-field dd a {
+  color: var(--mountain-accent);
+  word-break: break-all;
+}
+
+.detail-description {
+  margin-top: 1rem;
+  line-height: 1.6;
+  color: #444;
+  white-space: pre-wrap;
+}
+
+/* ==========================================================================
+   Submit Dialog
+   ========================================================================== */
+.submit-dialog form {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.submit-dialog label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.submit-dialog footer {
+  padding: 0;
+  border-top: none;
+  text-align: right;
+}
+
+.submit-dialog footer button[type="submit"] {
+  background: var(--mountain-primary);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.submit-dialog footer button[type="submit"]:hover {
+  background: var(--mountain-dark);
+}
+
+.submit-error {
+  background: #fdecea;
+  color: #c0392b;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.submit-success {
+  background: var(--mountain-light);
+  color: var(--mountain-dark);
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Site Footer
+   ========================================================================== */
+.site-footer {
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  padding: 1.25rem 0;
+  text-align: center;
+  color: var(--mountain-stone);
+  font-size: 0.85rem;
+  margin-top: auto;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 768px) {
+  .site-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .filters-row select,
+  .filters-row input[type="date"] {
+    max-width: none;
+  }
+
+  .toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-actions {
+    justify-content: space-between;
+  }
+
+  .cal-day {
+    min-height: 36px;
+    font-size: 0.8rem;
+  }
+}

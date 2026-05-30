@@ -1,0 +1,4 @@
+squamish-events.db
+*.db-shm
+*.db-wal
+.env

@@ -1,0 +1,27 @@
+services:
+  squamish-events:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/arm64
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DB_PATH=/data/squamish-events.db
+      - SCRAPE_ON_STARTUP=true
+      - ADMIN_TOKEN=${ADMIN_TOKEN:-changeme}
+      - TZ=America/Vancouver
+    volumes:
+      - squamish-data:/data
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "homepage.group=Local"
+      - "homepage.name=Squamish Events"
+      - "homepage.icon=calendar"
+      - "homepage.href=http://localhost:8080"
+      - "homepage.description=Local event aggregator"
+
+volumes:
+  squamish-data:
